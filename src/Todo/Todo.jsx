@@ -7,29 +7,43 @@ export const Todo = () => {
   const [task, setTask] = useState([]);
   const [dateTime, setDateTime] = useState("");
 
-  // input change (CONTROLLED INPUT)
+  // input change
   const handleInputChange = (e) => {
     setInputValue(e.target.value);
   };
 
-  // add task → INPUT CLEARS HERE
+  // add task
   const handleFormSubmit = (e) => {
     e.preventDefault();
 
-    // 🔑 ADD TASK
-    if (inputValue.trim() !== "") {
-      if (!task.includes(inputValue.trim())) {
-        setTask((prev) => [...prev, inputValue.trim()]);
+    const trimmedValue = inputValue.trim();
+
+    if (trimmedValue !== "") {
+      const isDuplicate = task.some((t) => t.text === trimmedValue);
+
+      if (!isDuplicate) {
+        setTask((prev) => [...prev, { text: trimmedValue, completed: false }]);
       }
     }
 
-    // 🔥 THIS LINE MAKES INPUT BLANK
     setInputValue("");
   };
 
   // delete task
-  const handleTodoDelete = (value) => {
-    setTask(task.filter((t) => t !== value));
+  const handleTodoDelete = (text) => {
+    setTask(task.filter((t) => t.text !== text));
+  };
+
+  // toggle complete (LINE ON TEXT)
+  const handleToggleComplete = (text) => {
+    setTask(
+      task.map((t) => (t.text === text ? { ...t, completed: !t.completed } : t))
+    );
+  };
+
+  // clear all
+  const handleClearAll = () => {
+    setTask([]);
   };
 
   // date & time
@@ -70,15 +84,20 @@ export const Todo = () => {
         <ul>
           {task.map((curTask, index) => (
             <li key={index} className="todo-item">
-              <span>{curTask}</span>
+              <span className={curTask.completed ? "completed" : ""}>
+                {curTask.text}
+              </span>
 
-              <button className="check-btn">
+              <button
+                className="check-btn"
+                onClick={() => handleToggleComplete(curTask.text)}
+              >
                 <MdCheck />
               </button>
 
               <button
                 className="delete-btn"
-                onClick={() => handleTodoDelete(curTask)}
+                onClick={() => handleTodoDelete(curTask.text)}
               >
                 <MdDeleteForever />
               </button>
@@ -86,6 +105,14 @@ export const Todo = () => {
           ))}
         </ul>
       </section>
+
+      {task.length > 0 && (
+        <section className="clear-all">
+          <button className="clear-btn" onClick={handleClearAll}>
+            Clear All
+          </button>
+        </section>
+      )}
     </section>
   );
 };
